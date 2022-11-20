@@ -1,0 +1,106 @@
+import pandas as pd
+import numpy as np
+df=pd.read_csv("uber.csv")
+df.head()
+df.info()
+df.isnull()
+df.isnull.sum()
+df.fillna(0,inplace=True)
+df.isnull().sum()
+import matplotlib.pyplot as plt
+def haversine (lon_1, lon_2, lat_1, lat_2):
+    
+    lon_1, lon_2, lat_1, lat_2 = map(np.radians, [lon_1, lon_2, lat_1, lat_2])  #Degrees to Radians
+    
+    
+    diff_lon = lon_2 - lon_1
+    diff_lat = lat_2 - lat_1
+    
+
+    km = 2 * 6371 * np.arcsin(np.sqrt(np.sin(diff_lat/2.0)**2 + 
+                                      np.cos(lat_1) * np.cos(lat_2) * np.sin(diff_lon/2.0)**2))
+    
+    return km
+
+df['Distance']= haversine(df['pickup_longitude'],df['dropoff_longitude'],
+                             df['pickup_latitude'],df['dropoff_latitude'])
+
+df['Distance'] = df['Distance'].astype(float).round(2)
+
+plt.scatter(df["Distance"],df["fare_amount"])
+plt.xlabel("Distance")
+plt.ylabel("fare_amount")
+
+
+df.drop(df[df['Distance'] > 60].index, inplace = True)
+df.drop(df[df['Distance'] == 0].index, inplace = True)
+df.drop(df[df['fare_amount'] == 0].index, inplace = True)
+df.drop(df[df['fare_amount'] < 0].index, inplace = True)
+
+df.drop(df[(df['fare_amount']>100) & (df['Distance']<1)].index, inplace = True )
+df.drop(df[(df['fare_amount']<100) & (df['Distance']>100)].index, inplace = True )
+
+
+df.info()
+
+plt.scatter(df["Distance"],df["fare_amount"])
+plt.xlabel("Distance")
+plt.ylabel("fare_amount")
+
+
+corr=df.corr()
+corr.style.background_gradient(cmap="BuGn")
+
+
+from sklearn.preprocessing import StandardScaler
+
+x=df["Distance"].values.reshape(-1,1)
+y=df["fare_amount"].values.reshape(-1,1)
+
+
+
+std= StandardScaler()
+
+
+y_std=std.fit_transform(y)
+print(y_std)
+
+
+
+from sklearn.model_selection import train_test_split
+
+x_train,x_test,y_train,y_test=train_test_split(x_std,y_std,test_size=0.2)
+
+
+
+
+from sklearn.linear_model import LinearRegression
+l_reg = LinearRegression()
+l_reg.fit(x_train, y_train)
+
+
+y_pred = l_reg.predict(x_test)
+df = {'Actual': y_test, 'Predicted': y_pred}
+
+
+
+from sklearn import metrics
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Absolute % Error:', metrics.mean_absolute_percentage_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+
+Y_pred = regressor.predict(x_test)
+Y_pred
+
+
+
+from sklearn import metrics
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Absolute % Error:', metrics.mean_absolute_percentage_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+
+
